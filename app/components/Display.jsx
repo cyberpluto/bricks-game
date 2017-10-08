@@ -11,7 +11,7 @@ const DisplayWrapper = styled.div`
 	border: 4px solid #fff;
 `
 const Pixel = styled.div`
-	grid-column-start: ${p => p.x};
+	grid-column-start: ${p => p.x - 2};
 	grid-column-end: span 1;
 	grid-row-start: ${p => p.y};
 	grid-row-end: span 1;

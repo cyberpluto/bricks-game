@@ -15,47 +15,104 @@ const Wrapper = styled.div`
 export default class Main extends Component {
 	state = {
 		counter: 0,
-		position: 0,
+		Xposition: 0,
+		Yposition: 0,
+		brickLength: 3,
 		moveRight: true,
-		intervalId: null,
+		startLeft: true,
+		aimIntervalId: null,
+		dropIntervalId: null,
 		activePixels: [],
+		prevBrick: [],
 	}
 	componentDidMount() {
-		this.setState({intervalId: setInterval(this.aim, 300)})
+		this.setState({aimIntervalId: setInterval(this.aim, 500)})
 	}
+	// handleStart = () => {
+	// 	this.setState({intervalId: setInterval(this.aim, 500)})
+	// }
 	handleStop = () => {
-		clearInterval(this.state.intervalId)
+		clearInterval(this.state.aimIntervalId)
+		this.setState({dropIntervalId: setInterval(this.drop, 500)})
 	}
 	aim = () => {
-		let {counter, position, moveRight} = this.state
-		let length = 3
-		let newBrick = []
-		for (let i = 0; i < length; i++) {
-			newBrick.push({
-				x: position + i,
-				y: 1,
-				on: 1,
-			})
+		let {
+			Xposition,
+			moveRight,
+			brickLength,
+			activePixels,
+			prevBrick,
+		} = this.state
+
+		if (moveRight) {
+			Xposition = Xposition + 1
+		} else {
+			Xposition = Xposition - 1
 		}
-		if (((counter + 8) / 8) % 2 === 0) {
-			moveRight = false
+		this.setState({Xposition})
+
+		if (Xposition === 9) {
 			this.setState({moveRight: false})
-		} else if (((counter + 8) / 8) % 2 === 1) {
-			moveRight = true
+		} else if (Xposition === 1) {
 			this.setState({moveRight: true})
 		}
-		if (moveRight) {
-			this.setState({position: position + 1})
-		} else {
-			this.setState({position: position - 1})
+
+		let brick = []
+		for (let i = 0; i < brickLength; i++) {
+			brick.push({
+				x: Xposition + i,
+				y: 1,
+			})
 		}
 
-		let displayedPixels = newBrick.filter(i => i.x > 1 && i.x < 9)
-		let pixels = displayedPixels.map(i => {
-			return {...i, x: i.x - 1}
+		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
+		this.setState({prevBrick: visibleBrickPixels})
+
+		const Pixels = new Set(activePixels)
+		prevBrick.forEach(pixel => {
+			Pixels.delete(pixel)
 		})
-		this.setState({activePixels: pixels})
-		this.setState({counter: counter + 1})
+		visibleBrickPixels.forEach(pixel => {
+			Pixels.add(pixel)
+		})
+		this.setState({activePixels: [...Pixels]})
+	}
+
+	drop = () => {
+		let {
+			Xposition,
+			Yposition,
+			brickLength,
+			activePixels,
+			dropIntervalId,
+			prevBrick,
+		} = this.state
+
+		if (Yposition > 13) {
+			return clearInterval(dropIntervalId)
+		}
+
+		Yposition = Yposition + 1
+		this.setState({Yposition})
+
+		let brick = []
+		for (let i = 0; i < brickLength; i++) {
+			brick.push({
+				x: Xposition + i,
+				y: Yposition,
+			})
+		}
+		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
+		this.setState({prevBrick: visibleBrickPixels})
+
+		const Pixels = new Set(activePixels)
+		prevBrick.forEach(pixel => {
+			Pixels.delete(pixel)
+		})
+		visibleBrickPixels.forEach(pixel => {
+			Pixels.add(pixel)
+		})
+		this.setState({activePixels: [...Pixels]})
 	}
 	render() {
 		return (
