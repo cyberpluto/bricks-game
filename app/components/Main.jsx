@@ -28,21 +28,36 @@ export default class Main extends Component {
 	componentDidMount() {
 		this.setState({aimIntervalId: setInterval(this.aim, 500)})
 	}
-	// handleStart = () => {
-	// 	this.setState({intervalId: setInterval(this.aim, 500)})
-	// }
-	handleStop = () => {
+	startAiming = () => {
+		clearInterval(this.state.dropIntervalId)
+		this.setState({
+			Xposition: 0,
+			Yposition: 0,
+			prevBrick: [],
+			aimIntervalId: setInterval(this.aim, 500),
+		})
+	}
+	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
 		this.setState({dropIntervalId: setInterval(this.drop, 500)})
 	}
+	setActivePixels = brick => {
+		let {activePixels, prevBrick} = this.state
+
+		const visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
+		this.setState({prevBrick: visibleBrickPixels})
+
+		const Pixels = new Set(activePixels)
+		prevBrick.forEach(pixel => {
+			Pixels.delete(pixel)
+		})
+		visibleBrickPixels.forEach(pixel => {
+			Pixels.add(pixel)
+		})
+		this.setState({activePixels: [...Pixels]})
+	}
 	aim = () => {
-		let {
-			Xposition,
-			moveRight,
-			brickLength,
-			activePixels,
-			prevBrick,
-		} = this.state
+		let {Xposition, moveRight, brickLength} = this.state
 
 		if (moveRight) {
 			Xposition = Xposition + 1
@@ -64,33 +79,11 @@ export default class Main extends Component {
 				y: 1,
 			})
 		}
-
-		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
-		this.setState({prevBrick: visibleBrickPixels})
-
-		const Pixels = new Set(activePixels)
-		prevBrick.forEach(pixel => {
-			Pixels.delete(pixel)
-		})
-		visibleBrickPixels.forEach(pixel => {
-			Pixels.add(pixel)
-		})
-		this.setState({activePixels: [...Pixels]})
+		this.setActivePixels(brick)
 	}
 
 	drop = () => {
-		let {
-			Xposition,
-			Yposition,
-			brickLength,
-			activePixels,
-			dropIntervalId,
-			prevBrick,
-		} = this.state
-
-		if (Yposition > 13) {
-			return clearInterval(dropIntervalId)
-		}
+		let {Xposition, Yposition, brickLength} = this.state
 
 		Yposition = Yposition + 1
 		this.setState({Yposition})
@@ -102,21 +95,15 @@ export default class Main extends Component {
 				y: Yposition,
 			})
 		}
-		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
-		this.setState({prevBrick: visibleBrickPixels})
+		this.setActivePixels(brick)
 
-		const Pixels = new Set(activePixels)
-		prevBrick.forEach(pixel => {
-			Pixels.delete(pixel)
-		})
-		visibleBrickPixels.forEach(pixel => {
-			Pixels.add(pixel)
-		})
-		this.setState({activePixels: [...Pixels]})
+		if (Yposition > 13) {
+			this.startAiming()
+		}
 	}
 	render() {
 		return (
-			<Wrapper onClick={this.handleStop}>
+			<Wrapper onClick={this.startDropping}>
 				<Display value={this.state.activePixels} />
 			</Wrapper>
 		)
