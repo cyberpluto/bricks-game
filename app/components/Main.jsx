@@ -14,36 +14,84 @@ const Wrapper = styled.div`
 
 export default class Main extends Component {
 	state = {
-		counter: 0,
 		Xposition: 0,
-		Yposition: 0,
 		brickLength: 3,
 		moveRight: true,
 		startLeft: true,
 		aimIntervalId: null,
 		dropIntervalId: null,
+		stack: [],
+		brick: [],
 		activePixels: [],
-		prevBrick: [],
 	}
 	componentDidMount() {
-		this.setState({aimIntervalId: setInterval(this.aim, 500)})
+		this.setState({aimIntervalId: setInterval(this.aim, 400)})
 	}
-	// handleStart = () => {
-	// 	this.setState({intervalId: setInterval(this.aim, 500)})
-	// }
-	handleStop = () => {
+	startAiming = () => {
+		clearInterval(this.state.dropIntervalId)
+		this.setState({
+			Xposition: 0,
+			moveRight: true,
+			brick: [],
+			aimIntervalId: setInterval(this.aim, 500),
+		})
+	}
+	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
-		this.setState({dropIntervalId: setInterval(this.drop, 500)})
+		this.setState({dropIntervalId: setInterval(this.drop, 300)})
+	}
+	setActivePixels = newBrick => {
+		let {stack} = this.state
+
+		// Remove cut pixels
+		const visibleBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
+
+		// Create set of active pixels
+		// const Pixels = new Set(activePixels)
+		this.setState({
+			brick: visibleBrickPixels,
+			activePixels: [...stack, ...visibleBrickPixels],
+		})
+
+		if (this.getColisionPixels()) {
+			this.setState({
+				stack: [...stack, ...this.getColisionPixels()],
+			})
+			this.startAiming()
+		}
+	}
+	getColisionPixels = () => {
+		let {stack, brick} = this.state
+		let pixelsToStack = []
+		let colision = false
+
+		// If brick hit the bottom
+		if (brick[0].y === 14) {
+			pixelsToStack = brick
+			colision = true
+		}
+
+		for (let brickPixel of brick) {
+			for (let stackPixel of stack) {
+				if (
+					brickPixel.y + 1 === stackPixel.y &&
+					brickPixel.x === stackPixel.x
+				) {
+					pixelsToStack.push(brickPixel)
+					colision = true
+				}
+			}
+		}
+
+		if (colision) {
+			return pixelsToStack
+		}
+		return false
 	}
 	aim = () => {
-		let {
-			Xposition,
-			moveRight,
-			brickLength,
-			activePixels,
-			prevBrick,
-		} = this.state
+		let {Xposition, moveRight, brickLength} = this.state
 
+		// Increment or decrement Xposition
 		if (moveRight) {
 			Xposition = Xposition + 1
 		} else {
@@ -51,72 +99,39 @@ export default class Main extends Component {
 		}
 		this.setState({Xposition})
 
+		// Switch direction
 		if (Xposition === 9) {
 			this.setState({moveRight: false})
 		} else if (Xposition === 1) {
 			this.setState({moveRight: true})
 		}
 
-		let brick = []
+		// Calculate new brick
+		let newBrick = []
 		for (let i = 0; i < brickLength; i++) {
-			brick.push({
+			newBrick.push({
 				x: Xposition + i,
 				y: 1,
 			})
 		}
-
-		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
-		this.setState({prevBrick: visibleBrickPixels})
-
-		const Pixels = new Set(activePixels)
-		prevBrick.forEach(pixel => {
-			Pixels.delete(pixel)
-		})
-		visibleBrickPixels.forEach(pixel => {
-			Pixels.add(pixel)
-		})
-		this.setState({activePixels: [...Pixels]})
+		this.setActivePixels(newBrick)
 	}
 
 	drop = () => {
-		let {
-			Xposition,
-			Yposition,
-			brickLength,
-			activePixels,
-			dropIntervalId,
-			prevBrick,
-		} = this.state
+		let {brick} = this.state
 
-		if (Yposition > 13) {
-			return clearInterval(dropIntervalId)
-		}
-
-		Yposition = Yposition + 1
-		this.setState({Yposition})
-
-		let brick = []
-		for (let i = 0; i < brickLength; i++) {
-			brick.push({
-				x: Xposition + i,
-				y: Yposition,
+		let newBrick = []
+		for (let i = 0; i < brick.length; i++) {
+			newBrick.push({
+				x: brick[i].x,
+				y: brick[i].y + 1,
 			})
 		}
-		let visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
-		this.setState({prevBrick: visibleBrickPixels})
-
-		const Pixels = new Set(activePixels)
-		prevBrick.forEach(pixel => {
-			Pixels.delete(pixel)
-		})
-		visibleBrickPixels.forEach(pixel => {
-			Pixels.add(pixel)
-		})
-		this.setState({activePixels: [...Pixels]})
+		this.setActivePixels(newBrick)
 	}
 	render() {
 		return (
-			<Wrapper onClick={this.handleStop}>
+			<Wrapper onClick={this.startDropping}>
 				<Display value={this.state.activePixels} />
 			</Wrapper>
 		)

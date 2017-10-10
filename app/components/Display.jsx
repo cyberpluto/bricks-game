@@ -1,6 +1,18 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import styled from 'styled-components'
+import styled, {keyframes} from 'styled-components'
+
+const flash = keyframes`
+0% {
+	opacity: 0;
+}
+50% {
+	opacity: 1;
+}
+100% {
+	opacity: 0;
+}
+`
 
 const DisplayWrapper = styled.div`
 	display: inline-grid;
@@ -16,6 +28,7 @@ const Pixel = styled.div`
 	grid-row-start: ${p => p.y};
 	grid-row-end: span 1;
 	background: red;
+	// animation: ${flash} 0.3s ease;
 `
 
 class Display extends Component {
