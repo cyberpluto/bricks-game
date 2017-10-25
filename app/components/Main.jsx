@@ -20,12 +20,13 @@ export default class Main extends Component {
 		startLeft: true,
 		aimIntervalId: null,
 		dropIntervalId: null,
-		stack: [],
+		level: 15,
 		brick: [],
+		stack: [],
 		activePixels: [],
 	}
 	componentDidMount() {
-		this.setState({aimIntervalId: setInterval(this.aim, 400)})
+		this.setState({aimIntervalId: setInterval(this.aim, 300)})
 	}
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
@@ -33,60 +34,73 @@ export default class Main extends Component {
 			Xposition: 0,
 			moveRight: true,
 			brick: [],
-			aimIntervalId: setInterval(this.aim, 500),
+			aimIntervalId: setInterval(this.aim, 300),
 		})
 	}
 	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
-		this.setState({dropIntervalId: setInterval(this.drop, 300)})
+		this.setState({dropIntervalId: setInterval(this.drop, 200)})
 	}
+
 	setActivePixels = newBrick => {
 		let {stack} = this.state
-
 		// Remove cut pixels
-		const visibleBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
+		const fallingBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
 
-		// Create set of active pixels
-		// const Pixels = new Set(activePixels)
+		let {pixelsToStack, pixelsToBrick} = this.detectColision(fallingBrickPixels)
+
 		this.setState({
-			brick: visibleBrickPixels,
-			activePixels: [...stack, ...visibleBrickPixels],
+			brick: pixelsToBrick,
+			stack: [...stack, ...pixelsToStack],
+			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
 		})
 
-		if (this.getColisionPixels()) {
-			this.setState({
-				stack: [...stack, ...this.getColisionPixels()],
-			})
+		if (!pixelsToBrick.length) {
 			this.startAiming()
 		}
 	}
-	getColisionPixels = () => {
-		let {stack, brick} = this.state
+
+	detectColision = newBrick => {
+		let {stack, level} = this.state
 		let pixelsToStack = []
-		let colision = false
+		let pixelsToBrick = []
 
-		// If brick hit the bottom
-		if (brick[0].y === 14) {
-			pixelsToStack = brick
-			colision = true
-		}
-
-		for (let brickPixel of brick) {
-			for (let stackPixel of stack) {
-				if (
-					brickPixel.y + 1 === stackPixel.y &&
-					brickPixel.x === stackPixel.x
-				) {
-					pixelsToStack.push(brickPixel)
-					colision = true
+		if (stack.length) {
+			for (let brickPixel of newBrick) {
+				let secondColision = false
+				let colision = false
+				for (let stackPixel of stack) {
+					if (
+						brickPixel.y + 1 === stackPixel.y &&
+						brickPixel.x === stackPixel.x
+					) {
+						if (brickPixel.y < level) {
+							pixelsToStack.push(brickPixel)
+							colision = true
+							this.setState({
+								level: stackPixel.y,
+							})
+						} else {
+							secondColision = true
+						}
+					}
 				}
+				if (!colision) {
+					if (brickPixel.y < 13 && !secondColision) {
+						pixelsToBrick.push(brickPixel)
+					}
+				}
+			}
+		} else {
+			// First Brick
+			if (newBrick[0].y === 13) {
+				pixelsToStack = newBrick
+			} else {
+				pixelsToBrick = newBrick
 			}
 		}
 
-		if (colision) {
-			return pixelsToStack
-		}
-		return false
+		return {pixelsToStack, pixelsToBrick}
 	}
 	aim = () => {
 		let {Xposition, moveRight, brickLength} = this.state

@@ -47,3 +47,13 @@ variables: Xposition, Yposition, brickLength
 x. Detect colision
 	a. If set
 5. setActivePixels
+
+
+Behaviour
+
+Brick Pixels should fall untill each of them collide with either bottom or pixels from stack. I it is level 0 all pixels should be added to the stack.
+Add to the stack pixels that colide with the highest pixel of the stack
+
+DetectColision should return:
+1. pixels that should be added to the stack
+2. pixels that ahould be set as a brick in state
