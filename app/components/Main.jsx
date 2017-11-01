@@ -14,51 +14,92 @@ const Wrapper = styled.div`
 
 export default class Main extends Component {
 	state = {
-		counter: 0,
 		Xposition: 0,
-		Yposition: 0,
 		brickLength: 3,
 		moveRight: true,
 		startLeft: true,
 		aimIntervalId: null,
 		dropIntervalId: null,
+		level: 13,
+		brick: [],
+		stack: [],
 		activePixels: [],
-		prevBrick: [],
 	}
 	componentDidMount() {
-		this.setState({aimIntervalId: setInterval(this.aim, 500)})
+		this.setState({aimIntervalId: setInterval(this.aim, 200)})
 	}
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
 		this.setState({
 			Xposition: 0,
-			Yposition: 0,
-			prevBrick: [],
-			aimIntervalId: setInterval(this.aim, 500),
+			moveRight: true,
+			brick: [],
+			aimIntervalId: setInterval(this.aim, 200),
 		})
 	}
 	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
-		this.setState({dropIntervalId: setInterval(this.drop, 500)})
+		this.setState({dropIntervalId: setInterval(this.drop, 100)})
 	}
-	setActivePixels = brick => {
-		let {activePixels, prevBrick} = this.state
 
-		const visibleBrickPixels = brick.filter(i => i.x > 2 && i.x < 10)
-		this.setState({prevBrick: visibleBrickPixels})
+	setActivePixels = newBrick => {
+		let {stack, level} = this.state
+		// Remove cut pixels
+		const activeBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
 
-		const Pixels = new Set(activePixels)
-		prevBrick.forEach(pixel => {
-			Pixels.delete(pixel)
+		let {pixelsToStack, pixelsToBrick} = this.detectColision(activeBrickPixels)
+
+		this.setState({
+			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
+			brick: pixelsToBrick,
+			stack: [...stack, ...pixelsToStack],
+			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
 		})
-		visibleBrickPixels.forEach(pixel => {
-			Pixels.add(pixel)
-		})
-		this.setState({activePixels: [...Pixels]})
+
+		if (!pixelsToBrick.length) {
+			this.startAiming()
+		}
+	}
+
+	detectColision = newBrick => {
+		let {stack, level} = this.state
+		let pixelsToStack = []
+		let pixelsToBrick = []
+
+		for (let brickPixel of newBrick) {
+			let validColision = false
+			let invalidColision = false
+			// detect colision
+			if (!stack.length && brickPixel.y === 13) {
+				// First Brick
+				validColision = true
+				pixelsToStack.push(brickPixel)
+			} else if (stack.length) {
+				for (let stackPixel of stack) {
+					if (brickPixel.y === stackPixel.y && brickPixel.x === stackPixel.x) {
+						// valid colision
+						if (brickPixel.y === level) {
+							validColision = true
+							pixelsToStack.push({...brickPixel, y: brickPixel.y - 1})
+							// invalid colision
+						} else {
+							invalidColision = true
+						}
+					}
+				}
+			}
+			// no colision
+			if (!validColision && !invalidColision && brickPixel.y <= 13) {
+				pixelsToBrick.push(brickPixel)
+			}
+		}
+
+		return {pixelsToStack, pixelsToBrick}
 	}
 	aim = () => {
 		let {Xposition, moveRight, brickLength} = this.state
 
+		// Increment or decrement Xposition
 		if (moveRight) {
 			Xposition = Xposition + 1
 		} else {
@@ -66,40 +107,35 @@ export default class Main extends Component {
 		}
 		this.setState({Xposition})
 
+		// Switch direction
 		if (Xposition === 9) {
 			this.setState({moveRight: false})
 		} else if (Xposition === 1) {
 			this.setState({moveRight: true})
 		}
 
-		let brick = []
+		// Calculate new brick
+		let newBrick = []
 		for (let i = 0; i < brickLength; i++) {
-			brick.push({
+			newBrick.push({
 				x: Xposition + i,
 				y: 1,
 			})
 		}
-		this.setActivePixels(brick)
+		this.setActivePixels(newBrick)
 	}
 
 	drop = () => {
-		let {Xposition, Yposition, brickLength} = this.state
+		let {brick} = this.state
 
-		Yposition = Yposition + 1
-		this.setState({Yposition})
-
-		let brick = []
-		for (let i = 0; i < brickLength; i++) {
-			brick.push({
-				x: Xposition + i,
-				y: Yposition,
+		let newBrick = []
+		for (let i = 0; i < brick.length; i++) {
+			newBrick.push({
+				x: brick[i].x,
+				y: brick[i].y + 1,
 			})
 		}
-		this.setActivePixels(brick)
-
-		if (Yposition > 13) {
-			this.startAiming()
-		}
+		this.setActivePixels(newBrick)
 	}
 	render() {
 		return (
