@@ -32,9 +32,9 @@ export default class Main extends Component {
 	}
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
-		const {aimingSpeed} = this.state
+		const {aimingSpeed, brickLength} = this.state
 		this.setState({
-			Xposition: 1,
+			Xposition: 1 + (3 - brickLength),
 			moveRight: true,
 			brick: [],
 			aimIntervalId: setInterval(this.aim, aimingSpeed),
@@ -46,7 +46,7 @@ export default class Main extends Component {
 	}
 
 	setActivePixels = newBrick => {
-		let {stack, level} = this.state
+		let {stack, level, brickLength} = this.state
 		// Remove cut pixels
 		const activeBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
 
@@ -54,6 +54,10 @@ export default class Main extends Component {
 
 		this.setState({
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
+			brickLength:
+				pixelsToStack.length < brickLength && pixelsToStack.length !== 0
+					? brickLength - 1
+					: brickLength,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
 			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
@@ -112,7 +116,7 @@ export default class Main extends Component {
 		// Switch direction
 		if (Xposition === 8) {
 			this.setState({moveRight: false})
-		} else if (Xposition === 2) {
+		} else if (Xposition === 2 + (3 - brickLength)) {
 			this.setState({moveRight: true})
 		}
 
