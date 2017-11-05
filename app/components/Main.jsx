@@ -24,7 +24,7 @@ export default class Main extends Component {
 		brick: [],
 		stack: [],
 		activePixels: [],
-		aimingSpeed: 200,
+		aimingSpeed: 300,
 	}
 	componentDidMount() {
 		const {aimingSpeed} = this.state
@@ -46,7 +46,7 @@ export default class Main extends Component {
 	}
 
 	setActivePixels = newBrick => {
-		let {stack, level, brickLength} = this.state
+		let {stack, level, brickLength, aimingSpeed} = this.state
 		// Remove cut pixels
 		const activeBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
 
@@ -58,6 +58,7 @@ export default class Main extends Component {
 				pixelsToStack.length < brickLength && pixelsToStack.length !== 0
 					? brickLength - 1
 					: brickLength,
+			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.9 : aimingSpeed,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
 			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
