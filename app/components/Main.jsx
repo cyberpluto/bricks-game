@@ -14,7 +14,7 @@ const Wrapper = styled.div`
 
 export default class Main extends Component {
 	state = {
-		Xposition: 0,
+		Xposition: 1,
 		brickLength: 3,
 		moveRight: true,
 		startLeft: true,
@@ -31,7 +31,7 @@ export default class Main extends Component {
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
 		this.setState({
-			Xposition: 0,
+			Xposition: 1,
 			moveRight: true,
 			brick: [],
 			aimIntervalId: setInterval(this.aim, 200),
@@ -97,20 +97,19 @@ export default class Main extends Component {
 		return {pixelsToStack, pixelsToBrick}
 	}
 	aim = () => {
-		let {Xposition, moveRight, brickLength} = this.state
+		const {Xposition, moveRight, brickLength} = this.state
 
 		// Increment or decrement Xposition
 		if (moveRight) {
-			Xposition = Xposition + 1
+			this.setState({Xposition: Xposition + 1})
 		} else {
-			Xposition = Xposition - 1
+			this.setState({Xposition: Xposition - 1})
 		}
-		this.setState({Xposition})
 
 		// Switch direction
-		if (Xposition === 9) {
+		if (Xposition === 8) {
 			this.setState({moveRight: false})
-		} else if (Xposition === 1) {
+		} else if (Xposition === 2) {
 			this.setState({moveRight: true})
 		}
 
