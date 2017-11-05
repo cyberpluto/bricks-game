@@ -24,17 +24,20 @@ export default class Main extends Component {
 		brick: [],
 		stack: [],
 		activePixels: [],
+		aimingSpeed: 200,
 	}
 	componentDidMount() {
-		this.setState({aimIntervalId: setInterval(this.aim, 200)})
+		const {aimingSpeed} = this.state
+		this.setState({aimIntervalId: setInterval(this.aim, aimingSpeed)})
 	}
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
+		const {aimingSpeed} = this.state
 		this.setState({
 			Xposition: 1,
 			moveRight: true,
 			brick: [],
-			aimIntervalId: setInterval(this.aim, 200),
+			aimIntervalId: setInterval(this.aim, aimingSpeed),
 		})
 	}
 	startDropping = () => {
