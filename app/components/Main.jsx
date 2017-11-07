@@ -55,10 +55,7 @@ export default class Main extends Component {
 
 		this.setState({
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
-			brickLength:
-				pixelsToStack.length < brickLength && pixelsToStack.length !== 0
-					? brickLength - 1
-					: brickLength,
+			brickLength: pixelsToStack.length ? pixelsToStack.length : brickLength,
 			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.9 : aimingSpeed,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
