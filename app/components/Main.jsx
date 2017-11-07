@@ -13,22 +13,23 @@ const Wrapper = styled.div`
 `
 
 export default class Main extends Component {
-	state = {
-		Xposition: 1,
-		brickLength: 3,
-		moveRight: true,
-		startLeft: true,
-		aimIntervalId: null,
-		dropIntervalId: null,
-		level: 13,
-		brick: [],
-		stack: [],
-		activePixels: [],
-		aimingSpeed: 300,
-	}
 	componentDidMount() {
-		const {aimingSpeed} = this.state
-		this.setState({aimIntervalId: setInterval(this.aim, aimingSpeed)})
+		this.startGame()
+	}
+	startGame = () => {
+		this.setState({
+			Xposition: 1,
+			brickLength: 3,
+			moveRight: true,
+			startLeft: true,
+			aimIntervalId: setInterval(this.aim, 300),
+			dropIntervalId: null,
+			level: 13,
+			brick: [],
+			stack: [],
+			activePixels: [],
+			aimingSpeed: 300,
+		})
 	}
 	startAiming = () => {
 		clearInterval(this.state.dropIntervalId)
