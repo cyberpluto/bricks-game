@@ -13,13 +13,17 @@ const Wrapper = styled.div`
 `
 
 export default class Main extends Component {
+	state = {}
 	componentDidMount() {
 		this.startGame()
 	}
 	startGame = () => {
+		clearInterval(this.state.dropIntervalId)
+		clearInterval(this.state.aimIntervalId)
 		this.setState({
 			Xposition: 1,
 			brickLength: 3,
+			lostPixels: 0,
 			moveRight: true,
 			startLeft: true,
 			aimIntervalId: setInterval(this.aim, 300),
@@ -47,22 +51,28 @@ export default class Main extends Component {
 	}
 
 	setActivePixels = newBrick => {
-		let {stack, level, brickLength, aimingSpeed} = this.state
+		let {stack, level, brickLength, lostPixels, aimingSpeed} = this.state
 		// Remove cut pixels
 		const activeBrickPixels = newBrick.filter(i => i.x > 2 && i.x < 10)
 
-		let {pixelsToStack, pixelsToBrick} = this.detectColision(activeBrickPixels)
+		let {pixelsToStack, pixelsToBrick, pixelsLost} = this.detectColision(
+			activeBrickPixels
+		)
 
 		this.setState({
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
-			brickLength: pixelsToStack.length ? pixelsToStack.length : brickLength,
+			brickLength: brickLength - pixelsLost,
+			lostPixels: lostPixels + pixelsLost,
 			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.9 : aimingSpeed,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
 			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
 		})
 
-		if (!pixelsToBrick.length) {
+		if (lostPixels === 3) {
+			console.log('start', lostPixels, brickLength)
+			this.startGame()
+		} else if (!pixelsToBrick.length) {
 			this.startAiming()
 		}
 	}
@@ -71,6 +81,7 @@ export default class Main extends Component {
 		let {stack, level} = this.state
 		let pixelsToStack = []
 		let pixelsToBrick = []
+		let pixelsLost = 0
 
 		for (let brickPixel of newBrick) {
 			let validColision = false
@@ -85,14 +96,26 @@ export default class Main extends Component {
 					if (brickPixel.y === stackPixel.y && brickPixel.x === stackPixel.x) {
 						// valid colision
 						if (brickPixel.y === level) {
+							console.log('valid')
 							validColision = true
 							pixelsToStack.push({...brickPixel, y: brickPixel.y - 1})
 							// invalid colision
 						} else {
+							console.log('invalid')
+							pixelsLost += 1
 							invalidColision = true
 						}
 					}
 				}
+			}
+			if (
+				stack.length &&
+				!validColision &&
+				!invalidColision &&
+				brickPixel.y === 13
+			) {
+				console.log('bottom')
+				pixelsLost += 1
 			}
 			// no colision
 			if (!validColision && !invalidColision && brickPixel.y <= 13) {
@@ -100,7 +123,7 @@ export default class Main extends Component {
 			}
 		}
 
-		return {pixelsToStack, pixelsToBrick}
+		return {pixelsToStack, pixelsToBrick, pixelsLost}
 	}
 	aim = () => {
 		const {Xposition, moveRight, brickLength} = this.state

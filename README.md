@@ -58,4 +58,7 @@ DetectColision should return:
 1. pixels that should be added to the stack
 2. pixels that ahould be set as a brick in state
 
-1 2 | 3 4 5 6 7 8 9 | 
+1 2 | 3 4 5 6 7 8 9 |
+
+End of game:  
+Number of pixels that didn't sucessfully colide is equal to the length of brick. 
