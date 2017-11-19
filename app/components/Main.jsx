@@ -53,7 +53,7 @@ export default class Main extends Component {
 	updateState = newBrick => {
 		let {stack, level, brickLength, lostPixels, aimingSpeed} = this.state
 
-		let {pixelsToStack, pixelsToBrick, lost} = this.detectColision(newBrick)
+		let {pixelsToStack, pixelsToBrick, lost} = this.detectCollision(newBrick)
 
 		this.setState({
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
@@ -72,52 +72,49 @@ export default class Main extends Component {
 		}
 	}
 
-	detectColision = newBrick => {
+	detectCollision = newBrick => {
 		let {stack, level} = this.state
 		let pixelsToStack = []
 		let pixelsToBrick = []
 		let lost = 0
 
 		for (let brickPixel of newBrick) {
-			let validColision = false
-			let invalidColision = false
+			let validCollision = false
+			let invalidCollision = false
+
+			// Cut pixels outside of the display
 			if ((brickPixel.x <= 2 || brickPixel.x >= 10) && brickPixel.y > 1) {
 				lost += 1
 				continue
 			}
-			// detect colision
+			// detect collision
 			if (!stack.length && brickPixel.y === 13) {
 				// First Brick
-				validColision = true
+				validCollision = true
 				pixelsToStack.push(brickPixel)
 			}
 			if (stack.length) {
 				for (let stackPixel of stack) {
 					if (brickPixel.y === stackPixel.y && brickPixel.x === stackPixel.x) {
 						if (brickPixel.y === level) {
-							// valid colision
-							validColision = true
+							// valid collision
+							validCollision = true
 							pixelsToStack.push({...brickPixel, y: brickPixel.y - 1})
 						} else {
-							// invalid colision
+							// invalid collision
 							lost += 1
-							invalidColision = true
+							invalidCollision = true
 						}
 					}
 				}
 			}
-			// Reached the bottom
-			if (
-				stack.length &&
-				!validColision &&
-				!invalidColision &&
-				brickPixel.y === 13
-			) {
-				lost += 1
-			}
-			// no colision
-			if (!validColision && !invalidColision && brickPixel.y <= 13) {
-				pixelsToBrick.push(brickPixel)
+			// No collision
+			if (!validCollision && !invalidCollision) {
+				if (brickPixel.y <= 13) {
+					pixelsToBrick.push(brickPixel)
+				} else {
+					lost += 1
+				}
 			}
 		}
 
