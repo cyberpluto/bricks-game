@@ -152,17 +152,13 @@ export default class Main extends Component {
 	}
 
 	drop = () => {
-		let {brick} = this.state
-
-		let newBrick = []
-		for (let i = 0; i < brick.length; i++) {
-			newBrick.push({
-				x: brick[i].x,
-				y: brick[i].y + 1,
-			})
-		}
+		let newBrick = this.state.brick.map(pixel => ({
+			...pixel,
+			y: pixel.y + 1,
+		}))
 		this.setActivePixels(newBrick)
 	}
+
 	render() {
 		return (
 			<Wrapper onClick={this.startDropping}>
