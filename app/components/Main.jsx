@@ -53,14 +53,12 @@ export default class Main extends Component {
 	setActivePixels = newBrick => {
 		let {stack, level, brickLength, lostPixels, aimingSpeed} = this.state
 
-		let {pixelsToStack, pixelsToBrick, pixelsLost} = this.detectColision(
-			newBrick
-		)
+		let {pixelsToStack, pixelsToBrick, lost} = this.detectColision(newBrick)
 
 		this.setState({
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
-			brickLength: brickLength - pixelsLost,
-			lostPixels: lostPixels + pixelsLost,
+			brickLength: brickLength - lost,
+			lostPixels: lostPixels + lost,
 			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.9 : aimingSpeed,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
@@ -78,13 +76,13 @@ export default class Main extends Component {
 		let {stack, level} = this.state
 		let pixelsToStack = []
 		let pixelsToBrick = []
-		let pixelsLost = 0
+		let lost = 0
 
 		for (let brickPixel of newBrick) {
 			let validColision = false
 			let invalidColision = false
 			if ((brickPixel.x <= 2 || brickPixel.x >= 10) && brickPixel.y > 1) {
-				pixelsLost += 1
+				lost += 1
 				continue
 			}
 			// detect colision
@@ -92,7 +90,8 @@ export default class Main extends Component {
 				// First Brick
 				validColision = true
 				pixelsToStack.push(brickPixel)
-			} else if (stack.length) {
+			}
+			if (stack.length) {
 				for (let stackPixel of stack) {
 					if (brickPixel.y === stackPixel.y && brickPixel.x === stackPixel.x) {
 						if (brickPixel.y === level) {
@@ -101,7 +100,7 @@ export default class Main extends Component {
 							pixelsToStack.push({...brickPixel, y: brickPixel.y - 1})
 						} else {
 							// invalid colision
-							pixelsLost += 1
+							lost += 1
 							invalidColision = true
 						}
 					}
@@ -114,7 +113,7 @@ export default class Main extends Component {
 				!invalidColision &&
 				brickPixel.y === 13
 			) {
-				pixelsLost += 1
+				lost += 1
 			}
 			// no colision
 			if (!validColision && !invalidColision && brickPixel.y <= 13) {
@@ -122,7 +121,7 @@ export default class Main extends Component {
 			}
 		}
 
-		return {pixelsToStack, pixelsToBrick, pixelsLost}
+		return {pixelsToStack, pixelsToBrick, lost}
 	}
 	aim = () => {
 		const {Xposition, moveRight, brickLength} = this.state
