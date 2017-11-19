@@ -50,7 +50,7 @@ export default class Main extends Component {
 		this.setState({dropIntervalId: setInterval(this.drop, 100)})
 	}
 
-	setActivePixels = newBrick => {
+	updateState = newBrick => {
 		let {stack, level, brickLength, lostPixels, aimingSpeed} = this.state
 
 		let {pixelsToStack, pixelsToBrick, lost} = this.detectColision(newBrick)
@@ -148,7 +148,7 @@ export default class Main extends Component {
 				y: 1,
 			})
 		}
-		this.setActivePixels(newBrick)
+		this.updateState(newBrick)
 	}
 
 	drop = () => {
@@ -156,7 +156,7 @@ export default class Main extends Component {
 			...pixel,
 			y: pixel.y + 1,
 		}))
-		this.setActivePixels(newBrick)
+		this.updateState(newBrick)
 	}
 
 	render() {
