@@ -43,8 +43,8 @@ class Display extends Component {
 	render() {
 		const allPixels = []
 		{
-			for (let i = 1; i < 14; i++) {
-				for (let j = 1; j < 8; j++) {
+			for (let i = 1; i <= 13; i++) {
+				for (let j = 1; j <= 7; j++) {
 					allPixels.push(<Pixel key={`${i}${j}`} />)
 				}
 			}
@@ -55,7 +55,11 @@ class Display extends Component {
 				<PrizeLevel level={13}>{`TOP PRIZE`}</PrizeLevel>
 				<PrizeLevel level={9}>{`SMALL PRIZE`}</PrizeLevel>
 				{allPixels}
-				{value.map((p, i) => <ActivePixel key={i} x={p.x - 2} y={p.y} />)}
+				{value.map((p, i) => {
+					if (p.x > 2 && p.x < 10) {
+						return <ActivePixel key={i} x={p.x - 2} y={p.y} />
+					}
+				})}
 			</DisplayWrapper>
 		)
 	}
