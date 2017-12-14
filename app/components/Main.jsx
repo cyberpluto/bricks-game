@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import styled from 'styled-components'
+import keydown from 'react-keydown'
 
 import Display from 'components/Display'
 
@@ -34,8 +35,14 @@ const Wrapper = styled.div`
 	transition: 0.3s;
 `
 
-export default class Main extends Component {
+@keydown('space')
+class Main extends Component {
 	state = {}
+	componentWillReceiveProps({keydown}) {
+		if (keydown.event) {
+			this.startDropping()
+		}
+	}
 	componentDidMount() {
 		this.startGame()
 	}
@@ -54,7 +61,7 @@ export default class Main extends Component {
 			brick: [],
 			stack: [],
 			activePixels: [],
-			aimingSpeed: 300,
+			aimingSpeed: 200,
 		})
 	}
 	startAiming = () => {
@@ -67,6 +74,7 @@ export default class Main extends Component {
 			aimIntervalId: setInterval(this.aim, aimingSpeed),
 		})
 	}
+
 	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
 		this.setState({dropIntervalId: setInterval(this.drop, 100)})
@@ -81,7 +89,7 @@ export default class Main extends Component {
 			level: (pixelsToStack.length && pixelsToStack[0].y) || level,
 			brickLength: brickLength - lost,
 			lostPixels: lostPixels + lost,
-			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.9 : aimingSpeed,
+			aimingSpeed: pixelsToStack.length ? aimingSpeed * 0.85 : aimingSpeed,
 			brick: pixelsToBrick,
 			stack: [...stack, ...pixelsToStack],
 			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
@@ -184,10 +192,11 @@ export default class Main extends Component {
 
 	render() {
 		return (
-			<Wrapper onClick={this.startDropping}>
-			<Wrapper onClick={this.startDropping} level={13 - this.state.level}>
+			<Wrapper level={13 - this.state.level}>
 				<Display value={this.state.activePixels} />
 			</Wrapper>
 		)
 	}
 }
+
+export default Main

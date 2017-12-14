@@ -60,8 +60,8 @@ const PrizeLevel = styled.div`
 		tinycolor(p.theme.color.activePixel)
 			.setAlpha(p.theme.textOpacity)
 			.toRgbString()};
-	font-size: calc(100vh / 15);
-	font-family: Sans-Serif;
+	font-size: calc(100vh / 13);
+	font-family: 'VT323', monospace;
 `
 class Display extends Component {
 	static propTypes = {

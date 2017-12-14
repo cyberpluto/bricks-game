@@ -35,6 +35,7 @@
     "react-dom": "^15.5.4",
     "react-dom-confetti": "^0.0.7",
     "react-hot-loader": "^3.0.0-beta.7",
+    "react-keydown": "^1.9.6",
     "react-redux": "^5.0.4",
     "react-router-dom": "^4.1.1",
     "redux": "^3.5.2",
