@@ -3,13 +3,35 @@ import styled from 'styled-components'
 
 import Display from 'components/Display'
 
+const colors = [
+	'#3E8320',
+	'#4A8622',
+	'#5B8C1E',
+	'#6A911D',
+	'#7D9619',
+	'#939A18',
+	'#9F9315',
+	'#A38313',
+	'#A97512',
+	'#AD6110',
+	'#B6490E',
+	'#B63507',
+	'#B81A04',
+	'#B81A04',
+]
+
 const Wrapper = styled.div`
+	position: relative;
 	display: flex;
 	justify-content: center;
 	margin: 0 auto;
 	height: 100vh;
 	width: 100vw;
-	background: black;
+	background: linear-gradient(65deg, ${colors.join(', ')});
+	background-size: 1300% 100%;
+	background-repeat: no-repeat;
+	background-position: ${p => 0 - p.level * 100}vw 0;
+	transition: 0.3s;
 `
 
 export default class Main extends Component {
@@ -159,6 +181,7 @@ export default class Main extends Component {
 	render() {
 		return (
 			<Wrapper onClick={this.startDropping}>
+			<Wrapper onClick={this.startDropping} level={13 - this.state.level}>
 				<Display value={this.state.activePixels} />
 			</Wrapper>
 		)

@@ -1,14 +1,22 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
+import tinycolor from 'tinycolor2'
 
 const DisplayWrapper = styled.div`
+	position: relative;
 	display: inline-grid;
 	grid-template-columns: repeat(7, calc(100vh / 13));
 	grid-template-rows: repeat(13, calc(100vh / 13));
 	overflow: hidden;
-
-	background: rgb(148, 0, 20);
+	background: ${p => p.theme.color.displayBg};
+	z-index: 3;
+`
+const TextLayer = DisplayWrapper.extend`
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: transparent;
 `
 const Pixel = styled.div`
 	grid-column-start: ${p => p.x};
@@ -16,12 +24,19 @@ const Pixel = styled.div`
 	grid-row-start: ${p => p.y};
 	grid-row-end: span 1;
 	margin: 5px;
-	background: rgba(255, 255, 255, 0.02);
-	box-shadow: 0 0 6px 1px rgab(255, 255, 255, 0.02);
+	background: ${p =>
+		tinycolor(p.theme.color.activePixel)
+			.setAlpha(p.theme.pixelOpacity)
+			.toRgbString()};
+	box-shadow: 0 0 6px 1px
+		${p =>
+			tinycolor(p.theme.color.activePixel)
+				.setAlpha(p.theme.pixelOpacity)
+				.toRgbString()};
 `
 const ActivePixel = Pixel.extend`
-	background: rgba(252, 253, 240, 1);
-	box-shadow: 0 0 6px 1px rgba(252, 253, 240, 1);
+	background: ${p => p.theme.color.activePixel};
+	box-shadow: 0 0 6px 1px ${p => p.theme.color.activePixel};
 `
 const PrizeLevel = styled.div`
 	grid-column-start: 1;
@@ -31,8 +46,20 @@ const PrizeLevel = styled.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 2px solid rgba(255, 255, 255, 0.1);
-	color: rgba(255, 255, 255, 0.1);
+	border-top: 4px solid
+		${p =>
+			tinycolor(p.theme.color.activePixel)
+				.setAlpha(p.theme.textOpacity)
+				.toRgbString()};
+	border-bottom: 4px solid
+		${p =>
+			tinycolor(p.theme.color.activePixel)
+				.setAlpha(p.theme.textOpacity)
+				.toRgbString()};
+	color: ${p =>
+		tinycolor(p.theme.color.activePixel)
+			.setAlpha(p.theme.textOpacity)
+			.toRgbString()};
 	font-size: calc(100vh / 15);
 	font-family: Sans-Serif;
 `
@@ -52,9 +79,11 @@ class Display extends Component {
 		const {value = []} = this.props
 		return (
 			<DisplayWrapper>
-				<PrizeLevel level={13}>{`TOP PRIZE`}</PrizeLevel>
-				<PrizeLevel level={9}>{`SMALL PRIZE`}</PrizeLevel>
 				{allPixels}
+				<TextLayer>
+					<PrizeLevel level={13}>{`TOP PRIZE`}</PrizeLevel>
+					<PrizeLevel level={9}>{`SMALL PRIZE`}</PrizeLevel>
+				</TextLayer>
 				{value.map((p, i) => {
 					if (p.x > 2 && p.x < 10) {
 						return <ActivePixel key={i} x={p.x - 2} y={p.y} />
