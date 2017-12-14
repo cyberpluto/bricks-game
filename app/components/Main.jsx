@@ -87,6 +87,10 @@ export default class Main extends Component {
 			activePixels: [...stack, ...pixelsToStack, ...pixelsToBrick],
 		})
 
+		if (level === 1) {
+			this.startGame()
+		}
+
 		if (lostPixels === 3) {
 			this.startGame()
 		} else if (!pixelsToBrick.length) {
