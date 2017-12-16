@@ -39,7 +39,7 @@ const Wrapper = styled.div`
 class Main extends Component {
 	state = {}
 	componentWillReceiveProps({keydown}) {
-		if (keydown.event) {
+		if (keydown.event && this.state.aimIntervalId) {
 			this.startDropping()
 		}
 	}
@@ -77,7 +77,10 @@ class Main extends Component {
 
 	startDropping = () => {
 		clearInterval(this.state.aimIntervalId)
-		this.setState({dropIntervalId: setInterval(this.drop, 100)})
+		this.setState({
+			dropIntervalId: setInterval(this.drop, 100),
+			aimIntervalId: null,
+		})
 	}
 
 	updateState = newBrick => {
